@@ -8,7 +8,27 @@ const server = require("http").createServer(app);
 const PORT = process.env.PORT || 8080;
 const io = require("socket.io")(server, { cors: { origin: "*" } });
 app.use(express.json());
-app.use(cors());
+// ✅ Allow multiple origins
+const allowedOrigins = [
+  "https://ahly-admin.vercel.app",
+  "https://ahly-site.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // If needed for cookies/auth headers
+  })
+);
 app.use(require("morgan")("dev"));
 
 const emailData = {
